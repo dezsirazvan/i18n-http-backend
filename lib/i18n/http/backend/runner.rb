@@ -3,6 +3,7 @@
 require 'i18n'
 require 'http'
 require 'deep_merge'
+require 'byebug'
 
 module I18n
   module Http
@@ -16,17 +17,32 @@ module I18n
         # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
         def initialize(http_options = {})
+          @original_backend = I18n.backend
           @http_options = http_options
           @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
+        end
+
+        def translations
+          # Return merged translations from both backends
+          @original_backend.translations.merge(super)
+        end
+      
+        # Delegate unimplemented methods to the original backend
+        def method_missing(method, *args, &block)
+          @original_backend.send(method, *args, &block)
+        end
+      
+        def respond_to_missing?(method, include_private = false)
+          @original_backend.respond_to?(method) || super
         end
 
         # Fetch the remote translations for the given locale and merge them with the local translations.
         def available_translations(locale)
           remote_translations = fetch_remote_translations(locale)
-          local_translations = I18n.backend.translate(locale, nil)&.dig(locale.to_sym) || {}
+          local_translations = translations.dig(locale) || {}
 
           if remote_translations
-            local_translations.deep_merge(remote_translations)
+            remote_translations.deep_merge(local_translations)
           else
             local_translations
           end
@@ -36,8 +52,8 @@ module I18n
         # If the translation is not available remotely, fallback to the local translation.
         def translate(locale, key, options = {})
           begin
-            fetch_remote_translation(locale, key) || super(locale, key, options)
-          rescue NotImplementedError => e
+            fetch_remote_translation(locale, key) || @original_backend.translate(key, options.merge(locale: locale, fallback: true))
+          rescue NotImplementedError, UncaughtThrowError => e
             puts "Translation Error: #{e.message}"
             "translation missing: #{locale.to_s}.#{key.to_s}"
           end
@@ -63,7 +79,7 @@ module I18n
         def fetch_remote_translations(locale)
           response = http_client.get("#{base_url}/#{locale}.json")
 
-          JSON.parse(response.body) if response.status.success?
+          JSON.parse(response.body).transform_keys(&:to_sym) if response.status.success?
         rescue HTTP::Error
           nil
         end
@@ -71,7 +87,7 @@ module I18n
         # Fetch the remote translation for the given key and locale.
         # Merge the remote translations with the local translations.
         def fetch_remote_translation(locale, key)
-          translations = available_translations(locale)
+          translations = available_translations(locale.to_sym)
           translations[key.to_sym] || translations[key.to_s]
         end
 
