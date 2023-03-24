@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "backend/version"
+require_relative 'backend/version'
 
 module I18n
   module Http

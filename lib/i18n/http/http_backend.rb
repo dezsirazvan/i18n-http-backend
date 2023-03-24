@@ -1,30 +1,83 @@
-require "i18n" # Require the i18n gem
-require "http" # Require the http gem
+# frozen_string_literal: true
+
+require 'i18n'
+require 'http'
+require 'deep_merge'
 
 module I18n
   module Backend
     module Http
       class HttpBackend
-        include I18n::Backend::Base # Include the I18n::Backend::Base module to make this class a valid backend
+        include I18n::Backend::Base
 
-        def available_locales
-          fetch_remote_locales + I18n.available_locales # Fetch available remote locales via HTTP and merge them with the available locales defined in the application
+        # Initialize a new instance of HttpBackend with optional HTTP options.
+        # Fetch the remote locales and merge them with the available locales from I18n.
+        def initialize(http_options = {})
+          @http_options = http_options
+          @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
         end
 
-        def translate(locale, key, options = {})
-          result = fetch_remote_translation(locale, key) # Try to fetch the translation from the remote server
-          result ||= I18n.translate(key, options.merge(locale: locale, fallback: true)) # If no translation is found, fall back to the default I18n.translate method
-          result
+        # Return the available locales.
+        attr_reader :available_locales
+
+        # Fetch the remote translations for the given locale and merge them with the local translations.
+        def available_translations(locale)
+          remote_translations = fetch_remote_translations(locale)
+          local_translations = I18n.backend.send(:translations)[locale.to_sym]
+
+          if remote_translations
+            local_translations.deep_merge(remote_translations)
+          else
+            local_translations
+          end
         end
 
+        # Translate the given key for the given locale.
+        # If the translation is not available remotely, fallback to the local translation.
+        def translate(locale, key, _options = {})
+          fetch_remote_translation(locale, key) || I18n.t(key, locale: locale, fallback: true)
+        end
+
+        private
+
+        # Fetch the remote locales via HTTP.
+        # Parse the response body and convert locales to symbols.
+        # Return an empty array if the HTTP request fails.
         def fetch_remote_locales
-          # TODO: Implement fetching of remote locales via HTTP
-          []
+          response = HTTP.get('http://example.com/locales')
+          if response.status.success?
+            JSON.parse(response.to_s)['locales'].map(&:to_sym)
+          else
+            []
+          end
         end
 
-        def fetch_remote_translation(locale, key)
-          # TODO: Implement fetching of remote translation via HTTP
+        # Fetch the remote translations for the given locale via HTTP.
+        # Parse the response body and return the JSON object or nil if the HTTP request fails.
+        def fetch_remote_translations(locale)
+          response = http_client.get("#{base_url}/translations/#{locale}")
+
+          response.status.success? ? JSON.parse(response.body) : nil
+        rescue HTTP::Error
           nil
+        end
+
+        # Fetch the remote translation for the given key and locale.
+        # Merge the remote translations with the local translations.
+        def fetch_remote_translation(locale, key)
+          translations = available_translations(locale)
+          translations[key.to_sym] || translations[key.to_s]
+        end
+
+        # Set up the HTTP client with default headers and timeouts.
+        def http_client
+          HTTP.headers(accept: 'application/json').timeout(connect: 2, read: 5).follow
+        end
+
+        # Get the base URL for the remote translations.
+        # Default to 'http://example.com' if not specified in @http_options.
+        def base_url
+          @http_options[:base_url] || 'http://example.com'
         end
       end
     end
