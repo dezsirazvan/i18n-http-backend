@@ -23,7 +23,7 @@ module I18n
         # Fetch the remote translations for the given locale and merge them with the local translations.
         def available_translations(locale)
           remote_translations = fetch_remote_translations(locale)
-          local_translations = translations[locale.to_sym]
+          local_translations = I18n.backend.send(:translations)[locale.to_sym]
 
           if remote_translations
             local_translations.deep_merge(remote_translations)
@@ -36,11 +36,6 @@ module I18n
         # If the translation is not available remotely, fallback to the local translation.
         def translate(locale, key, _options = {})
           fetch_remote_translation(locale, key) || I18n.t(key, locale: locale, fallback: true)
-        end
-
-        # Return all translations for all locales.
-        def translations
-          I18n.backend.instance_variable_get(:@translations)
         end
 
         private
