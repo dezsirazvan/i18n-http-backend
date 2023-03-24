@@ -34,10 +34,11 @@ module I18n
 
         # Translate the given key for the given locale.
         # If the translation is not available remotely, fallback to the local translation.
-        def translate(locale, key, _options = {})
+        def translate(locale, key)
           begin
             fetch_remote_translation(locale, key) || super(locale, key, fallback: true)
           rescue NotImplementedError
+            puts "Translation Error: #{e.message}"
             "translation missing: #{locale.to_s}.#{key.to_s}"
           end
         end
