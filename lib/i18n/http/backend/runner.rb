@@ -17,13 +17,14 @@ module I18n
         # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
         def initialize(http_options = {})
+          @original_backend = I18n.backend
           @http_options = http_options
           @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
         end
 
         def translations
-          # Return merged translations from both backends
-          I18n.backend.translations
+          # Return local translations
+          @original_backend.translations
         end
 
         # Fetch the remote translations for the given locale and merge them with the local translations.
