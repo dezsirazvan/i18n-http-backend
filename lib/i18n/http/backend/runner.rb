@@ -78,7 +78,7 @@ module I18n
         # Get the base URL for the remote translations.
         # Default to 'http://example.com' if not specified in @http_options.
         def base_url
-          @http_options[:base_url] || 'https://github.com/dezsirazvan/translations/blob/master'
+          @http_options[:base_url] || 'https://raw.githubusercontent.com/dezsirazvan/translations/master'
         end
       end
     end
