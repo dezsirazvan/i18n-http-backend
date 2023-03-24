@@ -8,7 +8,7 @@ module I18n
   module Http
     module Backend
       class Runner
-        include I18n::Backend::Base
+        include ::I18n::Backend::Base
 
         # Return the available locales.
         attr_reader :available_locales
