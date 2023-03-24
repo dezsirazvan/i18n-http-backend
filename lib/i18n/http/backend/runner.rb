@@ -37,7 +37,7 @@ module I18n
         def translate(locale, key)
           begin
             fetch_remote_translation(locale, key) || super(locale, key, fallback: true)
-          rescue NotImplementedError
+          rescue NotImplementedError => e
             puts "Translation Error: #{e.message}"
             "translation missing: #{locale.to_s}.#{key.to_s}"
           end
