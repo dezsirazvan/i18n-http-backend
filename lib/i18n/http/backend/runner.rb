@@ -74,7 +74,7 @@ module I18n
 
         # Fetch the remote translation for the given key and locale.
         def fetch_translation(locale, key)
-          translations = available_translations(locale.to_sym)
+          translations = available_translations(locale.to_sym) || {}
           translations[key.to_sym] || translations[key.to_s]
         end
 
