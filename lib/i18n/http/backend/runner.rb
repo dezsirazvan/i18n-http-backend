@@ -43,11 +43,7 @@ module I18n
         # If the translation is not available remotely, fallback to the local translation.
         def translate(locale, key, options = {})
           translation = fetch_translation(locale, key)
-          if translation.nil?
-            @original_backend&.translate(locale, key, options = {})
-          else
-            translation
-          end
+          translation
         rescue => e
           puts "Translation Error: #{e.message}"
           "translation missing: #{locale}.#{key}"
