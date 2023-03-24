@@ -29,21 +29,19 @@ module I18n
 
         # Fetch the remote translations for the given locale and merge them with the local translations.
         def available_translations(locale)
-          remote_translations = fetch_remote_translations(locale)
-          local_translations = translations.dig(locale) || {}
-
-          if remote_translations
-            remote_translations.deep_merge(local_translations)
-          else
-            local_translations
-          end
+          fetch_remote_translations(locale)
         end
 
         # Translate the given key for the given locale.
         # If the translation is not available remotely, fallback to the local translation.
         def translate(locale, key, options = {})
           translation = fetch_translation(locale, key)
-          translation
+
+          if translation.nil?
+            @original_backend&.translate(locale, key, options = {})
+          else
+            translation
+          end
         rescue => e
           puts "Translation Error: #{e.message}"
           "translation missing: #{locale}.#{key}"
