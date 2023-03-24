@@ -10,15 +10,15 @@ module I18n
       class Runner
         include I18n::Backend::Base
 
+        # Return the available locales.
+        attr_reader :available_locales
+
         # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
         def initialize(http_options = {})
           @http_options = http_options
           @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
         end
-
-        # Return the available locales.
-        attr_reader :available_locales
 
         # Fetch the remote translations for the given locale and merge them with the local translations.
         def available_translations(locale)
@@ -44,7 +44,7 @@ module I18n
         # Parse the response body and convert locales to symbols.
         # Return an empty array if the HTTP request fails.
         def fetch_remote_locales
-          response = http_client.get("#{base_url}/locales")
+          response = http_client.get("#{base_url}/locales.json")
 
           if response.status.success?
             JSON.parse(response.to_s)['locales'].map(&:to_sym)
@@ -56,7 +56,7 @@ module I18n
         # Fetch the remote translations for the given locale via HTTP.
         # Parse the response body and return the JSON object or nil if the HTTP request fails.
         def fetch_remote_translations(locale)
-          response = http_client.get("#{base_url}/translations/#{locale}")
+          response = http_client.get("#{base_url}#{locale}.json")
 
           if response.status.success?
             JSON.parse(response.body)
@@ -82,7 +82,7 @@ module I18n
         # Get the base URL for the remote translations.
         # Default to 'http://example.com' if not specified in @http_options.
         def base_url
-          @http_options[:base_url] || 'http://example.com'
+          @http_options[:base_url] || 'https://github.com/dezsirazvan/translations/blob/master'
         end
       end
     end

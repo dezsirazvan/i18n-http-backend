@@ -34,8 +34,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'deep_merge'
   spec.add_dependency 'http'
-  spec.add_dependency 'i18n', '~> 1.0'
-  spec.add_dependency 'rubocop'
+  spec.add_dependency 'i18n'
   spec.add_dependency 'webmock'
 
   # For more information and examples about making a new gem, checkout our
