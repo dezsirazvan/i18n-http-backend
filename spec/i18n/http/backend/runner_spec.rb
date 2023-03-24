@@ -68,7 +68,7 @@ RSpec.describe I18n::Http::Backend::Runner do
 
     context "when the remote translation doesn't exist" do
       it 'falls back to the default translation' do
-        expect(backend.translate(:hello, :fr)).to eq(nil)
+        expect(backend.translate(:hello, :fr)).to eq('translation missing: fr.hello')
       end
     end
   end

@@ -43,10 +43,12 @@ module I18n
         # If the translation is not available remotely, fallback to the local translation.
         def translate(key, locale, options = {})
           begin
-            fetch_remote_translation(locale, key) || translations.dig(locale, key)
-          rescue NotImplementedError, UncaughtThrowError, nil => e
+            translation = fetch_remote_translation(locale, key)
+            translation ||= translations&.dig(locale, key)
+            translation || "translation missing: #{locale}.#{key}"
+          rescue => e
             puts "Translation Error: #{e.message}"
-            "translation missing: #{locale.to_s}.#{key.to_s}"
+            "translation missing: #{locale}.#{key}"
           end
         end
 
