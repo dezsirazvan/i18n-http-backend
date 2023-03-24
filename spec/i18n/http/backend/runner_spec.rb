@@ -4,17 +4,17 @@ require 'spec_helper'
 require 'http'
 
 RSpec.describe I18n::Http::Backend::Runner do
-  let(:backend) { described_class.new }
+  let(:backend) { described_class.new({ base_url: 'http://example.com' }) }
 
   before do
     # Stub requests for fetching remote locales and translations
     stub_request(:get, 'http://example.com/locales.json')
       .to_return(status: 200, body: '{"locales":["en","fr","es"]}', headers: {})
-    stub_request(:get, 'http://example.com/translations/en.json')
+    stub_request(:get, 'http://example.com/en.json')
       .to_return(status: 200, body: '{"hello":"Hello","world":"World"}', headers: {})
-    stub_request(:get, 'http://example.com/translations/fr.json')
+    stub_request(:get, 'http://example.com/fr.json')
       .to_return(status: 404, body: '', headers: {})
-    stub_request(:get, 'http://example.com/translations/es.json')
+    stub_request(:get, 'http://example.com/es.json')
       .to_return(status: 200, body: '{"hello":"Hola","world":"Mundo"}', headers: {})
   end
 
@@ -45,8 +45,8 @@ RSpec.describe I18n::Http::Backend::Runner do
 
     context 'when the remote translations are updated' do
       it 'updates the remote translations' do
-        stub_request(:get, 'http://example.com/translations/en.json').to_return(status: 200,
-                                                                           body: '{"hello":"Updated Hello","world":"Updated World"}', headers: {})
+        stub_request(:get, 'http://example.com/en.json').to_return(status: 200,
+                                                                   body: '{"hello":"Updated Hello","world":"Updated World"}', headers: {})
         backend.available_translations(:en)
 
         expect(backend.available_translations(:en)['hello']).to eq('Updated Hello')

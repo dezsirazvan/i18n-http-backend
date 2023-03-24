@@ -56,13 +56,9 @@ module I18n
         # Fetch the remote translations for the given locale via HTTP.
         # Parse the response body and return the JSON object or nil if the HTTP request fails.
         def fetch_remote_translations(locale)
-          response = http_client.get("#{base_url}#{locale}.json")
+          response = http_client.get("#{base_url}/#{locale}.json")
 
-          if response.status.success?
-            JSON.parse(response.body)
-          else
-            nil
-          end
+          JSON.parse(response.body) if response.status.success?
         rescue HTTP::Error
           nil
         end
