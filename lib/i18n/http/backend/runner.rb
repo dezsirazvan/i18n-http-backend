@@ -41,10 +41,9 @@ module I18n
 
         # Translate the given key for the given locale.
         # If the translation is not available remotely, fallback to the local translation.
-        def translate(key, locale, options = {})
+        def translate(locale, key, options = {})
           begin
-            translation = fetch_remote_translation(locale, key)
-            translation ||= translations&.dig(locale, key)
+            translation = fetch_translation(locale, key)
             translation || "translation missing: #{locale}.#{key}"
           rescue => e
             puts "Translation Error: #{e.message}"
@@ -78,8 +77,7 @@ module I18n
         end
 
         # Fetch the remote translation for the given key and locale.
-        # Merge the remote translations with the local translations.
-        def fetch_remote_translation(locale, key)
+        def fetch_translation(locale, key)
           translations = available_translations(locale.to_sym)
           translations[key.to_sym] || translations[key.to_s]
         end
