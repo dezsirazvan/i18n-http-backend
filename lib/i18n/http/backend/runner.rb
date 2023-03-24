@@ -44,8 +44,8 @@ module I18n
         def translate(locale, key, options = {})
           begin
             translation = fetch_translation(locale, key)
-            translation || "translation missing: #{locale}.#{key}"
-          rescue => e
+            translation || super(locale, key, options)
+          rescue NotImplementedError => e
             puts "Translation Error: #{e.message}"
             "translation missing: #{locale}.#{key}"
           end
