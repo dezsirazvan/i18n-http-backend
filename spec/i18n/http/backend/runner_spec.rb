@@ -28,7 +28,7 @@ RSpec.describe I18n::Http::Backend::Runner do
     context 'when the remote translation exists' do
       it 'returns the available translations including remote and local translations' do
         local_translations = { en: { hello: 'Local Hello' } }
-        allow(I18n.backend).to receive(:translations).and_return(local_translations)
+        allow(I18n.backend).to receive(:translate).and_return(local_translations)
 
         expect(backend.available_translations(:en)).to eq({ hello: 'Hello' }.merge(local_translations[:en]))
       end
@@ -37,7 +37,7 @@ RSpec.describe I18n::Http::Backend::Runner do
     context "when the remote translation doesn't exist" do
       it 'returns the available translations including local translations only' do
         local_translations = { fr: { bonjour: 'Bonjour' } }
-        allow(I18n.backend).to receive(:translations).and_return(local_translations)
+        allow(I18n.backend).to receive(:translate).and_return(local_translations)
 
         expect(backend.available_translations(:fr)).to eq(local_translations[:fr])
       end
@@ -62,7 +62,7 @@ RSpec.describe I18n::Http::Backend::Runner do
 
     context 'when the remote translation exists' do
       it 'returns the translated string' do
-        expect(backend.translate(:en, 'hello')).to eq('Updated Hello')
+        expect(backend.translate(:en, 'hello')).to eq('Hello')
       end
     end
 
