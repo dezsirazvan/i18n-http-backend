@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'http'
 
 RSpec.describe I18n::Http::Backend::Runner do
-  let(:backend) { described_class.new({ base_url: 'http://example.com' }) }
+  let(:backend) { described_class.new(http_options: { base_url: 'http://example.com' }) }
 
   before do
     # Stub requests for fetching remote locales and translations

@@ -16,15 +16,15 @@ module I18n
 
         # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
-        def initialize(http_options = {})
-          @original_backend = I18n.backend
+        def initialize(original_backend: I18n.backend, http_options: {})
+          @original_backend = original_backend
           @http_options = http_options
           @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
         end
 
         def translations
           # Return local translations
-          @original_backend.translations
+          @original_backend&.translations || {}
         end
 
         # Fetch the remote translations for the given locale and merge them with the local translations.
@@ -44,12 +44,11 @@ module I18n
         def translate(locale, key, options = {})
           translation = fetch_translation(locale, key)
           if translation.nil?
-            # Delegate to the next backend in the chain
-            super
+            @original_backend&.translate(locale, key, options = {})
           else
             translation
           end
-        rescue NotImplementedError => e
+        rescue => e
           puts "Translation Error: #{e.message}"
           "translation missing: #{locale}.#{key}"
         end        
