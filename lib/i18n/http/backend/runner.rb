@@ -72,9 +72,7 @@ module I18n
 
         # Set up the HTTP client with default headers and timeouts.
         def http_client
-          options = { headers: { accept: 'application/json' }, timeout: { connect: 2, read: 5 }, follow: true }
-          options[:ssl] = { verify_mode: OpenSSL::SSL::VERIFY_PEER }
-          HTTP.headers(options[:headers]).timeout(options[:timeout]).follow(options[:follow]).ssl(options[:ssl])
+          HTTP.headers(accept: 'application/json').timeout(connect: 2, read: 5).follow
         end
 
         # Get the base URL for the remote translations.
