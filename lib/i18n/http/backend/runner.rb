@@ -17,23 +17,13 @@ module I18n
         # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
         def initialize(http_options = {})
-          @original_backend = I18n.backend
           @http_options = http_options
           @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
         end
 
         def translations
           # Return merged translations from both backends
-          @original_backend.translations.merge(super)
-        end
-      
-        # Delegate unimplemented methods to the original backend
-        def method_missing(method, *args, &block)
-          @original_backend.send(method, *args, &block)
-        end
-      
-        def respond_to_missing?(method, include_private = false)
-          @original_backend.respond_to?(method) || super
+          I18n.backend.translations
         end
 
         # Fetch the remote translations for the given locale and merge them with the local translations.
@@ -52,8 +42,8 @@ module I18n
         # If the translation is not available remotely, fallback to the local translation.
         def translate(locale, key, options = {})
           begin
-            fetch_remote_translation(locale, key) || @original_backend.translate(key, options.merge(locale: locale, fallback: true))
-          rescue NotImplementedError, UncaughtThrowError => e
+            fetch_remote_translation(locale, key) || translations.dig(locale, key)
+          rescue NotImplementedError, UncaughtThrowError, nil => e
             puts "Translation Error: #{e.message}"
             "translation missing: #{locale.to_s}.#{key.to_s}"
           end
