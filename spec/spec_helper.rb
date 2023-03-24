@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'i18n/http/backend'
-require_relative '../lib/i18n/http/http_backend'
+require_relative '../lib/i18n/http/backend/runner'
 require 'webmock/rspec'
 
 RSpec.configure do |config|

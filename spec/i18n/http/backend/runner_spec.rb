@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'i18n/http/backend'
 require 'http'
 
-RSpec.describe I18n::Backend::Http::HttpBackend do
+RSpec.describe I18n::Http::Backend::Runner do
   let(:backend) { described_class.new }
 
   before do

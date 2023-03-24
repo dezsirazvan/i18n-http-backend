@@ -5,12 +5,12 @@ require 'http'
 require 'deep_merge'
 
 module I18n
-  module Backend
-    module Http
-      class HttpBackend
+  module Http
+    module Backend
+      class Runner
         include I18n::Backend::Base
 
-        # Initialize a new instance of HttpBackend with optional HTTP options.
+        # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
         def initialize(http_options = {})
           @http_options = http_options
