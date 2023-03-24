@@ -44,7 +44,8 @@ module I18n
         # Parse the response body and convert locales to symbols.
         # Return an empty array if the HTTP request fails.
         def fetch_remote_locales
-          response = HTTP.get('http://example.com/locales')
+          response = http_client.get("#{base_url}/locales")
+
           if response.status.success?
             JSON.parse(response.to_s)['locales'].map(&:to_sym)
           else
@@ -57,7 +58,11 @@ module I18n
         def fetch_remote_translations(locale)
           response = http_client.get("#{base_url}/translations/#{locale}")
 
-          response.status.success? ? JSON.parse(response.body) : nil
+          if response.status.success?
+            JSON.parse(response.body)
+          else
+            nil
+          end
         rescue HTTP::Error
           nil
         end
