@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'active_support/cache'
 require 'http'
 
 RSpec.describe I18n::Http::Backend::Runner do

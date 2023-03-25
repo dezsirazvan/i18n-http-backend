@@ -33,6 +33,8 @@ Gem::Specification.new do |spec|
   # spec.add_dependency "example-gem", "~> 1.0"
 
   spec.add_dependency 'deep_merge'
+  spec.add_dependency 'redis'
+  spec.add_dependency "activesupport"
   spec.add_dependency 'http'
   spec.add_dependency 'i18n'
 
