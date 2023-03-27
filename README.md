@@ -1,7 +1,6 @@
 # I18n::Http::Backend
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/i18n/http/backend`. To experiment with that code, run `bin/console` for an interactive prompt.
-
+Welcome to I18n::Http::Backend, a gem that provides a remote backend for I18n translations in your Ruby applications. This gem allows you to store your translations in a remote server, such as GitHub, and access them over HTTP.
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -20,7 +19,7 @@ Or install it yourself as:
 
 ## Usage
 
-After the gem is installed you have to create a new i18n.rb initializer and to add this code on it. The cache is optional(it will store in memory as default if not a specific option is given). For the cache option you should send an instance of ActiveSupport::Cache::MemoryStore.new or Redis.new(url: ENV['REDIS_URL'])
+After the gem is installed you have to create a new i18n.rb initializer in the config/initializers directory of your Rails application. In this initializer, you should add the following code:
 
 example of i18n.rb initializer:
 
@@ -31,15 +30,16 @@ original_backend = I18n::Backend::Simple.new
 @cache = ActiveSupport::Cache::MemoryStore.new
 I18n.backend = I18n::Http::Backend::Runner.new(original_backend: original_backend, cache: @cache)
 ```
+The cache is optional(it will store in memory as default if not a specific option is given). For the cache option you should send an instance of ActiveSupport::Cache::MemoryStore.new or Redis.new(url: ENV['REDIS_URL'])
 
-for the Runner you can pass also a variable called http_options with a new base_url if you want to use another remote server.
+By default, the translations will be fetched from the GitHub repository at https://github.com/dezsirazvan/translations. You can change this by passing a base_url option to the http_options argument of I18n::Http::Backend::Runner.new. For example, if you want to fetch translations from a different server, you can use:
 
 ```ruby
 I18n::Http::Backend::Runner.new(original_backend: original_backend, http_options: { base_url: 'YOUR_NEW_URL_SERVER' })
 ```
-If the http_options: { base_url: 'YOUR_NEW_URL_SERVER' } is not passed, it will use my github project as a default remote url.
-I created a new github project just to store some jsons: https://github.com/dezsirazvan/translations. I named the files like this: {language}.json. So if you want to use another remote server, the files should be stored the same: REMOTE_SERVER/en.json, REMOTE_SERVER/fr.json in order to work with the current logic.
+If the http_options: { base_url: 'YOUR_NEW_URL_SERVER' } is not passed, it will use the default remote URL.
 
+The translations should be stored in JSON files named after their language code, such as en.json, fr.json, etc. They should be located in the root directory of the repository on the remote server.
 After this configuration is done you can use it like this:
 
 ```ruby
