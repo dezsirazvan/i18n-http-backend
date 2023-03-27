@@ -3,8 +3,7 @@
 require 'i18n'
 require 'http'
 require 'deep_merge'
-require 'redis'
-require 'active_support'
+require_relative 'cache'
 
 module I18n
   module Http
@@ -15,12 +14,14 @@ module I18n
         # Return the available locales.
         attr_reader :available_locales
 
+        BASE_URL = 'https://raw.githubusercontent.com/dezsirazvan/translations/master'
+
         # Initialize a new instance of Runner with optional HTTP options.
         # Fetch the remote locales and merge them with the available locales from I18n.
         def initialize(original_backend: I18n.backend, http_options: {}, cache: nil)
           @original_backend = original_backend
           @http_options = http_options
-          @cache = cache
+          @cache = Cache.new(cache)
           @available_locales = (fetch_remote_locales + I18n.available_locales).uniq
         end
 
@@ -30,6 +31,7 @@ module I18n
         def available_translations(locale)
           translations = fetch_from_cache(locale)
           return translations if translations
+
           translations = fetch_remote_translations(locale)
           store_in_cache(locale, translations) if translations
           translations
@@ -37,7 +39,7 @@ module I18n
 
         # Translate the given key for the given locale.
         # If the translation is not available remotely, fallback to the local translation.
-        def translate(locale, key, options = {})
+        def translate(locale, key, _options = {})
           translation = fetch_translation(locale, key)
 
           if translation.nil?
@@ -45,8 +47,7 @@ module I18n
           else
             translation
           end
-        rescue => e
-          puts "Translation Error: #{e.message}"
+        rescue StandardError => e
           "translation missing: #{locale}.#{key}"
         end
 
@@ -89,37 +90,19 @@ module I18n
         # Get the base URL for the remote translations.
         # Default to 'http://example.com' if not specified in @http_options.
         def base_url
-          @http_options[:base_url] || 'https://raw.githubusercontent.com/dezsirazvan/translations/master'
+          @http_options[:base_url] || BASE_URL
         end
 
         # Fetch the translations for the given locale from the cache.
         def fetch_from_cache(locale)
-          cache.fetch(cache_key_for(locale), expires_in: 1.hour) do
+          @cache.fetch(locale) do
             fetch_remote_translations(locale)
           end
         end
 
         # Store the translations for the given locale in the cache.
         def store_in_cache(locale, translations)
-          cache.write(cache_key_for(locale), translations)
-        end
-
-        # Generate the cache key for the given locale.
-        def cache_key_for(locale)
-          "i18n-http-backend:#{locale}"
-        end
-
-        # Get the cache instance to use for storing and retrieving translations.
-        # Use Redis if the REDIS_URL environment variable is set, otherwise use an
-        # in-memory cache.
-        def cache
-          @cache ||= begin
-            if ENV['REDIS_URL']
-              Redis.new(url: ENV['REDIS_URL'])
-            else
-              ActiveSupport::Cache::MemoryStore.new
-            end
-          end
+          @cache.write(locale, translations)
         end
       end
     end
