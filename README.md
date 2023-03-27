@@ -37,9 +37,8 @@ for the Runner you can pass also a variable called http_options with a new base_
 ```ruby
 I18n::Http::Backend::Runner.new(original_backend: original_backend, http_options: { base_url: 'YOUR_NEW_URL_SERVER' })
 ```
-
-I created a new github project just to store some jsons: https://github.com/dezsirazvan/translations. Here, I named the files like this: {language}.json. So if you want to use another remote server the files should be stored the same: en.json, fr.json in order to work with the current logic.
-
+If the http_options: { base_url: 'YOUR_NEW_URL_SERVER' } is not passed, it will use my github project as a default remote url.
+I created a new github project just to store some jsons: https://github.com/dezsirazvan/translations. I named the files like this: {language}.json. So if you want to use another remote server, the files should be stored the same: REMOTE_SERVER/en.json, REMOTE_SERVER/fr.json in order to work with the current logic.
 
 After this configuration is done you can use it like this:
 
