@@ -22,7 +22,34 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+After the gem is installed you have to create a new i18n.rb initializer and to add this code on it. The cache is optional(it will store in memory as default if not a specific option is given). For the cache option you should send an instance of ActiveSupport::Cache::MemoryStore.new or Redis.new(url: ENV['REDIS_URL'])
+
+example of i18n.rb initializer:
+
+```ruby
+require 'i18n/http/backend/runner'
+
+original_backend = I18n::Backend::Simple.new
+@cache = ActiveSupport::Cache::MemoryStore.new
+I18n.backend = I18n::Http::Backend::Runner.new(original_backend: original_backend, cache: @cache)
+```
+
+for the Runner you can pass also a variable called http_options with a new base_url if you want to use another remote server.
+
+```ruby
+I18n::Http::Backend::Runner.new(original_backend: original_backend, http_options: { base_url: 'YOUR_NEW_URL_SERVER' })
+```
+
+I created a new github project just to store some jsons: https://github.com/dezsirazvan/translations. Here, I named the files like this: {language}.json. So if you want to use another remote server the files should be stored the same: en.json, fr.json in order to work with the current logic.
+
+
+After this configuration is done you can use it like this:
+
+```ruby
+I18n.translate('hello') => "the default locale will be :en, so it will try first to find a file called en.json on the remote server and if that file exists and contain a key hello, it will take the remote value. if not, it will try to get the local value for the key hello from the file en.yml"
+I18n.translate('hello', locale: :fr)
+I18n.t('hello', locale: :es)
+```
 
 ## Development
 
